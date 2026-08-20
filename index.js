@@ -4,6 +4,7 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const connectDB = require('./src/config/db');
 const errorHandler = require('./src/middleware/errorHandler');
+const startKeepAlive = require('./src/utils/keepAlive');
 
 const authRoutes = require('./src/routes/authRoutes');
 const homeHeroRoutes = require('./src/routes/homeHeroRoutes');
@@ -22,9 +23,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Health check (no DB needed)
+// Health check & ping (no DB needed — used by Vercel Cron and keep-alive)
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+app.get('/api/ping', (req, res) => {
+  res.json({ status: 'alive', timestamp: new Date().toISOString() });
 });
 
 // Connect to MongoDB on each request (cached after first connection)
@@ -61,5 +66,6 @@ if (process.env.NODE_ENV !== 'production') {
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
+    startKeepAlive(); // Start keep-alive cron in local/traditional server
   });
 }
