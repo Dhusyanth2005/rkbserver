@@ -9,13 +9,7 @@
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "index.js"
-    }
-  ],
-  "crons": [
-    {
-      "path": "/api/ping",
-      "schedule": "*/14 * * * *"
+      "dest": "/index.js"
     }
   ]
 }
