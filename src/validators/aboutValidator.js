@@ -1,13 +1,16 @@
 const { z } = require('zod');
 
-const cloudinaryImageSchema = z.object({
-  url: z.string().url('Invalid Cloudinary URL'),
-  public_id: z.string().min(1, 'Public ID is required'),
-  alt: z.string().min(1, 'Alt text is required'),
-});
+const optionalCloudinarySchema = z.object({
+  url: z.string().default(''),
+  public_id: z.string().default(''),
+  alt: z.string().optional().default(''),
+}).refine(
+  (data) => !data.url || data.url.startsWith('http://') || data.url.startsWith('https://'),
+  { message: 'Invalid Cloudinary URL' }
+);
 
 const aboutHeroSchema = z.object({
-  portrait: cloudinaryImageSchema,
+  portrait: optionalCloudinarySchema.optional(),
   name: z.string().min(1, 'Name is required').max(100).default('Er. R K B Tamilpriyan'),
   role: z.string().min(1, 'Role is required').max(100).default('Civil Engineer & Urban Planner'),
   philosophy_quote: z.string().min(1, 'Philosophy quote is required'),
@@ -17,7 +20,7 @@ const aboutHeroSchema = z.object({
 const updateAboutHeroSchema = aboutHeroSchema.partial();
 
 const aboutLeadershipSchema = z.object({
-  photo: cloudinaryImageSchema,
+  photo: optionalCloudinarySchema.optional(),
   name: z.string().min(1, 'Name is required').max(100).default('Er. R K B Tamilpriyan'),
   role: z.string().min(1, 'Role is required').max(100).default('Civil Engineer & Urban Planner'),
   credentials: z.array(z.string()).default([]),

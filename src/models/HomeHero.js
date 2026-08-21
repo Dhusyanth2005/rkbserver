@@ -5,15 +5,31 @@ const HomeHeroSchema = new mongoose.Schema(
   {
     video_light: {
       type: CloudinaryImageSchema,
-      required: true,
+      default: () => ({ url: '', public_id: '', alt: '' }),
     },
     video_dark: {
       type: CloudinaryImageSchema,
-      required: true,
+      default: () => ({ url: '', public_id: '', alt: '' }),
     },
     poster: {
       type: CloudinaryImageSchema,
-      required: true,
+      default: () => ({ url: '', public_id: '', alt: '' }),
+    },
+    about_image: {
+      type: CloudinaryImageSchema,
+      default: () => ({ url: '', public_id: '', alt: '' }),
+    },
+    service_new_construction: {
+      type: CloudinaryImageSchema,
+      default: () => ({ url: '', public_id: '', alt: '' }),
+    },
+    service_remodeling: {
+      type: CloudinaryImageSchema,
+      default: () => ({ url: '', public_id: '', alt: '' }),
+    },
+    service_renovation: {
+      type: CloudinaryImageSchema,
+      default: () => ({ url: '', public_id: '', alt: '' }),
     },
   },
   {

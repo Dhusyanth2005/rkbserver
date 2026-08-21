@@ -57,6 +57,51 @@ exports.uploadFile = async (req, res, next) => {
   }
 };
 
+const destroyCloudinaryAsset = async (public_id, resourceType = 'image') => {
+  if (!public_id) return { result: 'not_provided' };
+
+  let cleanId = public_id;
+  if (cleanId.startsWith('http://') || cleanId.startsWith('https://')) {
+    const match = cleanId.match(/\/upload\/(?:v\d+\/)?(.+?)(?:\.[a-zA-Z0-9]+)?$/);
+    if (match) {
+      cleanId = match[1];
+    }
+  }
+
+  const idCandidates = [cleanId];
+  const withoutExt = cleanId.replace(/\.[^/.]+$/, '');
+  if (withoutExt !== cleanId) {
+    idCandidates.push(withoutExt);
+  }
+
+  const typesToTry = resourceType === 'video'
+    ? ['video', 'image', 'raw']
+    : ['image', 'video', 'raw'];
+
+  let lastResult = null;
+
+  for (const id of idCandidates) {
+    for (const type of typesToTry) {
+      try {
+        const res = await cloudinary.uploader.destroy(id, {
+          resource_type: type,
+          invalidate: true,
+        });
+        lastResult = res;
+        if (res.result === 'ok') {
+          return res;
+        }
+      } catch (err) {
+        console.error(`Cloudinary destroy attempt error (id: ${id}, type: ${type}):`, err.message);
+      }
+    }
+  }
+
+  return lastResult || { result: 'not found' };
+};
+
+exports.destroyCloudinaryAsset = destroyCloudinaryAsset;
+
 exports.deleteFile = async (req, res, next) => {
   try {
     const { public_id, resource_type = 'image' } = req.body;
@@ -65,15 +110,9 @@ exports.deleteFile = async (req, res, next) => {
       return res.status(400).json({ message: 'Public ID is required' });
     }
 
-    const result = await cloudinary.uploader.destroy(public_id, {
-      resource_type,
-    });
+    const result = await destroyCloudinaryAsset(public_id, resource_type);
 
-    if (result.result !== 'ok') {
-      return res.status(400).json({ message: 'Failed to delete file' });
-    }
-
-    res.json({ message: 'File deleted successfully' });
+    res.json({ message: 'File deletion processed', result: result?.result });
   } catch (error) {
     next(error);
   }

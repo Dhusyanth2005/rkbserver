@@ -1,15 +1,22 @@
 const { z } = require('zod');
 
-const cloudinaryImageSchema = z.object({
-  url: z.string().url('Invalid Cloudinary URL'),
-  public_id: z.string().min(1, 'Public ID is required'),
-  alt: z.string().optional(),
-});
+const optionalCloudinarySchema = z.object({
+  url: z.string().default(''),
+  public_id: z.string().default(''),
+  alt: z.string().optional().default(''),
+}).refine(
+  (data) => !data.url || data.url.startsWith('http://') || data.url.startsWith('https://'),
+  { message: 'Invalid Cloudinary URL' }
+);
 
 const homeHeroSchema = z.object({
-  video_light: cloudinaryImageSchema,
-  video_dark: cloudinaryImageSchema,
-  poster: cloudinaryImageSchema,
+  video_light: optionalCloudinarySchema.optional(),
+  video_dark: optionalCloudinarySchema.optional(),
+  poster: optionalCloudinarySchema.optional(),
+  about_image: optionalCloudinarySchema.optional(),
+  service_new_construction: optionalCloudinarySchema.optional(),
+  service_remodeling: optionalCloudinarySchema.optional(),
+  service_renovation: optionalCloudinarySchema.optional(),
 });
 
 const updateHomeHeroSchema = homeHeroSchema.partial();

@@ -5,7 +5,7 @@ const AboutHeroSchema = new mongoose.Schema(
   {
     portrait: {
       type: CloudinaryImageSchema,
-      required: true,
+      default: () => ({ url: '', public_id: '', alt: '' }),
     },
     name: {
       type: String,
